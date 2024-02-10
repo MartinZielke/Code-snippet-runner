@@ -1,5 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 const getDefaults = () => {
     const defaultSites = {
         'https://www.php.net': {
@@ -92,4 +90,4 @@ const getDefaults = () => {
     };
     return [defaultSites, defaultLanguageToSites, selected];
 };
-exports.default = getDefaults;
+export default getDefaults;

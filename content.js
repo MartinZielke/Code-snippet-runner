@@ -18,7 +18,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         },
         'https://learn.microsoft.com': {
             languageSelectors: {
-                'csharp': 'code'
+                'csharp': 'code.lang-csharp'
             }
         },
         'https://developer.mozilla.org': {
@@ -102,15 +102,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
             }
         },
     };
-    const selected = {
+    const defaultSelected = {
         'php': 'https://onlinephp.io',
         'csharp': 'https://dotnetfiddle.net',
         'javascript': 'https://jsfiddle.net',
         'html': 'https://jsfiddle.net',
         'css': 'https://jsfiddle.net',
     };
-    const result = yield chrome.storage.sync.get(['language']);
+    const result = yield chrome.storage.sync.get(['language', 'codesnippetSites', 'languageToSites', 'selected']);
     const language = result.language;
+    const codesnippetSites = result.codesnippetSites || defaultSites;
+    const languageToSites = result.languageToSites || defaultLanguageToSites;
+    const selected = result.selected || defaultSelected;
     if (language) {
         window.onload = () => __awaiter(void 0, void 0, void 0, function* () {
             var _a;
@@ -121,7 +124,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
             //Select to
             const text = yield navigator.clipboard.readText();
             const defaultEditorSelector = "[autocorrect='off'][autocapitalize='off'][spellcheck='false']";
-            const editorSelector = defaultLanguageToSites[language][url].editorSelector || defaultEditorSelector;
+            const editorSelector = languageToSites[language][url].editorSelector || defaultEditorSelector;
             const to = document.querySelector(editorSelector);
             if (!to) {
                 return;
@@ -132,15 +135,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
             to.dispatchEvent(event);
             document.execCommand('delete');
             document.execCommand('insertText', false, text);
-            const run = document.querySelector((_a = defaultLanguageToSites[language][url].runSelector) !== null && _a !== void 0 ? _a : '');
+            const run = document.querySelector((_a = languageToSites[language][url].runSelector) !== null && _a !== void 0 ? _a : '');
             run === null || run === void 0 ? void 0 : run.click();
         });
     }
     yield chrome.storage.sync.set({ 'language': '' });
-    if (!isKeyOf(location.origin, defaultSites)) {
+    if (!isKeyOf(location.origin, codesnippetSites)) {
         return;
     }
-    const languageSelectors = Object.entries(defaultSites[location.origin].languageSelectors);
+    const languageSelectors = Object.entries(codesnippetSites[location.origin].languageSelectors);
     languageSelectors.forEach(([language, selector]) => {
         const inputs = document.querySelectorAll(selector);
         inputs.forEach(input => {

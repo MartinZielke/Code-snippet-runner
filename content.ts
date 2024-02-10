@@ -1,10 +1,8 @@
-
-
 (async () => {
 
     const isKeyOf = <T extends Object>(key: keyof any, obj: T): key is keyof T => key in obj;
 
-    const defaultSites = {
+    const defaultSites: codesnippetSitesObj = {
         'https://www.php.net': {
             languageSelectors: {
                 'php': '.phpcode code',
@@ -12,7 +10,7 @@
         },
         'https://learn.microsoft.com': {
             languageSelectors: {
-                'csharp': 'code'
+                'csharp': 'code.lang-csharp'
             }
         },
         'https://developer.mozilla.org': {
@@ -103,17 +101,17 @@
     interface Site {
         runSelector?: string;
         editorSelector?: string;
-      }
-      
-      interface Sites {
-        [key: string]: Site;
-      }
-      
-      interface LanguageToSites {
-        [key: string]: Sites
-      }
+    }
 
-    const selected = {
+    interface Sites {
+        [key: string]: Site;
+    }
+
+    interface LanguageToSites {
+        [key: string]: Sites
+    }
+
+    const defaultSelected: SelectedObj = {
         'php': 'https://onlinephp.io',
         'csharp': 'https://dotnetfiddle.net',
         'javascript': 'https://jsfiddle.net',
@@ -121,23 +119,27 @@
         'css': 'https://jsfiddle.net',
     };
 
-    const result = await chrome.storage.sync.get(['language']);
+    const result = await chrome.storage.sync.get(['language', 'codesnippetSites', 'languageToSites', 'selected']);
     const language: string = result.language;
+
+    const codesnippetSites: codesnippetSitesObj = result.codesnippetSites || defaultSites;
+    const languageToSites: LanguageToSites = result.languageToSites || defaultLanguageToSites;
+    const selected: SelectedObj = result.selected || defaultSelected;
 
     if (language) {
         window.onload = async () => {
 
-            if(!isKeyOf(language, selected)) {
+            if (!isKeyOf(language, selected)) {
                 return;
             }
 
             const url = selected[language];
-            
+
             //Select to
             const text = await navigator.clipboard.readText();
-            
+
             const defaultEditorSelector = "[autocorrect='off'][autocapitalize='off'][spellcheck='false']";
-            const editorSelector = defaultLanguageToSites[language][url].editorSelector || defaultEditorSelector;
+            const editorSelector = languageToSites[language][url].editorSelector || defaultEditorSelector;
             const to = document.querySelector<HTMLElement>(editorSelector);
 
             if (!to) {
@@ -152,7 +154,7 @@
             document.execCommand('delete');
             document.execCommand('insertText', false, text);
 
-            const run = document.querySelector<HTMLElement>(defaultLanguageToSites[language][url].runSelector ?? '');
+            const run = document.querySelector<HTMLElement>(languageToSites[language][url].runSelector ?? '');
             run?.click()
 
         }
@@ -162,11 +164,11 @@
     await chrome.storage.sync.set({ 'language': '' });
 
 
-    if (!isKeyOf(location.origin, defaultSites)) {
+    if (!isKeyOf(location.origin, codesnippetSites)) {
         return;
     }
 
-    const languageSelectors = Object.entries(defaultSites[location.origin].languageSelectors);
+    const languageSelectors = Object.entries(codesnippetSites[location.origin].languageSelectors);
 
     languageSelectors.forEach(([language, selector]) => {
 

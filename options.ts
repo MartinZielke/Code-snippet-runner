@@ -1,69 +1,102 @@
+type codesnippetSitesObj = {
+    [key: string]: {
+        languageSelectors: {
+            [key: string]: string
+        }
+    }
+}
 
-chrome.storage.sync.get(['codesnippetSites', 'languageToSites', 'selected'], (result) => {
-    const codesnippetSites = result.codesnippetSites;
-    const languageToSites = result.languageToSites;
-    const selected = result.selected;
+type LanguageToSitesObj = {
+    [key: string]: {
+        [key: string]: {
+            runSelector?: string;
+            editorSelector?: string;
+        }
+    }
+}
+
+type SelectedObj = {
+    [key: string]: string
+}
+
+const isKeyOf = <T extends Object>(key: keyof any, obj: T): key is keyof T => key in obj;
+
+const generateCodeSnippetSiteDiv = (site: string, siteObject: { languageSelectors: { [key: string]: string } }, changeable = false) => {
+    const codeSnippetSite = document.createElement('div');
+    codeSnippetSite.classList.add('codesnippet-site');
+
+    const siteHeader = document.createElement('b');
+    siteHeader.classList.add('site-header');
+    siteHeader.textContent = site;
+    siteHeader.contentEditable = changeable.toString();
+    codeSnippetSite.appendChild(siteHeader);
+
+    Object.entries(siteObject.languageSelectors).forEach(([language, selector]) => {
+        const cssLanguageSelectors = generateLanguageSelectorDiv(site, language, selector, true);
+        codeSnippetSite.appendChild(cssLanguageSelectors);
+    });
+    const addLanguageSelector = document.createElement('button');
+    addLanguageSelector.textContent = 'Add language selector';
+    codeSnippetSite.appendChild(addLanguageSelector);
+
+    return codeSnippetSite;
+};
+
+const generateLanguageSelectorDiv = (site: string, language: string, selector: string, changeable = false) => {
+    const cssLanguageSelectors = document.createElement('div');
+    cssLanguageSelectors.classList.add('language-selector');
 
 
-    const isKeyOf = <T extends Object>(key: keyof any, obj: T): key is keyof T => key in obj;
+    const selectorLanguageLabel = document.createElement('label');
+    selectorLanguageLabel.textContent = language;
+    selectorLanguageLabel.classList.add('selector-language');
+    const codeSnippetSelectorId = `selector-${site}|${language}`;
 
+    if (!changeable) {
+        selectorLanguageLabel.htmlFor = codeSnippetSelectorId
+    }
+
+    selectorLanguageLabel.contentEditable = changeable.toString();
+
+    const codeSnippetSelector = document.createElement('input');
+
+    codeSnippetSelector.classList.add('codesnippet-selector');
+    codeSnippetSelector.value = selector;
+    codeSnippetSelector.name = codeSnippetSelectorId;
+    codeSnippetSelector.placeholder = 'Leave empty to use code tag as selector';
+    codeSnippetSelector.id = codeSnippetSelectorId;
+
+    const removeSite = document.createElement('button');
+    removeSite.classList.add('remove');
+    removeSite.textContent = 'Remove';
+
+    cssLanguageSelectors.appendChild(selectorLanguageLabel);
+    cssLanguageSelectors.appendChild(codeSnippetSelector);
+    cssLanguageSelectors.appendChild(removeSite);
+
+    return cssLanguageSelectors
+};
+
+const generateCodeSnippetSitesDiv = (codesnippetSites: codesnippetSitesObj) => {
     const codesnippetSitesHtml = document.querySelector<HTMLDivElement>("#codesnippet-sites");
     Object.entries(codesnippetSites).forEach(([site, siteObject]) => {
-        const codeSnippetSite = document.createElement('div');
-        codeSnippetSite.classList.add('codesnippet-site');
 
-        const siteHeader = document.createElement('b');
-        siteHeader.classList.add('site-header');
-
-        siteHeader.textContent = site;
-        codeSnippetSite.appendChild(siteHeader);
-
-
+        const codeSnippetSite = generateCodeSnippetSiteDiv(site, siteObject);
 
         codesnippetSitesHtml?.appendChild(codeSnippetSite);
-        Object.entries(siteObject.languageSelectors).forEach(([language, selector]) => {
-            const cssLanguageSelectors = document.createElement('div');
-            cssLanguageSelectors.classList.add('language-selector');
 
-
-            const selectorLanguageLabel = document.createElement('label');
-            selectorLanguageLabel.textContent = language;
-            selectorLanguageLabel.classList.add('selector-language');
-            const codeSnippetSelectorId = `selector-${site}|${language}`;
-            selectorLanguageLabel.htmlFor = codeSnippetSelectorId
-
-            const codeSnippetSelector = document.createElement('input');
-
-            codeSnippetSelector.classList.add('codesnippet-selector');
-            codeSnippetSelector.value = selector;
-            codeSnippetSelector.name = codeSnippetSelectorId;
-            codeSnippetSelector.placeholder = 'Leave empty to use code tag as selector';
-            codeSnippetSelector.id = codeSnippetSelectorId;
-
-            const removeSite = document.createElement('button');
-            removeSite.textContent = 'Remove';
-
-            cssLanguageSelectors.appendChild(selectorLanguageLabel);
-            cssLanguageSelectors.appendChild(codeSnippetSelector);
-            cssLanguageSelectors.appendChild(removeSite);
-
-            codeSnippetSite.appendChild(cssLanguageSelectors);
-
-
-
-
-        });
-        const addLanguageSelector = document.createElement('button');
-        addLanguageSelector.textContent = 'Add language selector';
-        codeSnippetSite.appendChild(addLanguageSelector);
         const hr = document.createElement('hr');
         codesnippetSitesHtml?.appendChild(hr);
     })
 
     const addSite = document.createElement('button');
+    addSite.classList.add('add-site');
     addSite.textContent = 'Add site';
+    addSite.type = 'button';
     codesnippetSitesHtml?.appendChild(addSite);
+};
 
+const generateLanguageToSitesDiv = (languageToSites: LanguageToSitesObj, selected: SelectedObj) => {
     const languageToSitesHtml = document.querySelector<HTMLDivElement>("#language-sites");
     Object.entries(languageToSites).forEach(([language, languageObject]) => {
         const languageToSitesDiv = document.createElement('div');
@@ -119,6 +152,7 @@ chrome.storage.sync.get(['codesnippetSites', 'languageToSites', 'selected'], (re
             codeSnippetSite.appendChild(selectedRadioButton);
 
             const removeSite = document.createElement('button');
+            removeSite.classList.add('remove');
             removeSite.textContent = 'Remove';
             codeSnippetSite.appendChild(removeSite);
 
@@ -136,28 +170,16 @@ chrome.storage.sync.get(['codesnippetSites', 'languageToSites', 'selected'], (re
     const addLanguage = document.createElement('button');
     addLanguage.textContent = 'Add language';
     languageToSitesHtml?.appendChild(addLanguage);
+}
 
+chrome.storage.sync.get(['codesnippetSites', 'languageToSites', 'selected'], (result) => {
+    const codesnippetSites: codesnippetSitesObj = result.codesnippetSites;
+    const languageToSites: LanguageToSitesObj = result.languageToSites;
+    const selected: SelectedObj = result.selected;
 
-    type codesnippetSitesObj = {
-        [key: string]: {
-            languageSelectors: {
-                [key: string]: string
-            }
-        }
-    }
+    generateCodeSnippetSitesDiv(codesnippetSites);
+    generateLanguageToSitesDiv(languageToSites, selected);
 
-    type LanguageToSitesObj = {
-        [key: string]: {
-            [key: string]: {
-                runSelector?: string;
-                editorSelector?: string;
-            }
-        }
-    }
-
-    type SelectedObj = {
-        [key: string]: string
-    }
 
     const save = () => {
 
@@ -202,21 +224,60 @@ chrome.storage.sync.get(['codesnippetSites', 'languageToSites', 'selected'], (re
             selectedObj[languageHeader] = languageToSite.querySelector<HTMLInputElement>('.selected-site-for-language:checked')?.value ?? '';
         });
 
-
         chrome.storage.sync.set({
             'codesnippetSites': codesnippetSitesObj,
             'languageToSites': languageToSitesObj,
             'selected': selectedObj
         })
 
+        alert('Saved');
+
 
     }
+
+    document.addEventListener('click', (e) => {
+
+        if (!(e.target instanceof HTMLElement)) {
+            return;
+        }
+
+        if (e.target.classList.contains('add-site')) {
+            const codeSnippetSite = generateCodeSnippetSiteDiv("Site", {
+                languageSelectors: {
+                    "Write language here": "",
+                }
+            }, true);
+            const codesnippetSitesHtml = document.querySelector<HTMLDivElement>("#codesnippet-sites");
+
+            codesnippetSitesHtml?.appendChild(codeSnippetSite);
+            const hr = document.createElement('hr');
+            codesnippetSitesHtml?.appendChild(hr);
+            codesnippetSitesHtml?.appendChild(e.target);
+
+        }
+
+        if (e.target.classList.contains('remove')) {
+            const grandparentElement = e.target.parentElement?.parentElement;
+
+            e.target.parentElement?.remove();
+            if (grandparentElement?.querySelectorAll('.remove').length === 0) {
+                //remove empty hr
+                grandparentElement.nextElementSibling?.remove();
+                grandparentElement.remove();
+
+
+            }
+
+        }
+    });
 
     const options = document.querySelector<HTMLFormElement>('#options');
     options?.addEventListener('submit', (e) => {
         e.preventDefault();
         save();
     })
+
+
 });
 
 
