@@ -161,7 +161,7 @@
 
     }
 
-    chrome.storage.sync.set({ 'language': '' });
+    await chrome.storage.sync.set({ 'language': '' });
 
 
     if (!isKeyOf(location.origin, codesnippetSites)) {

@@ -139,7 +139,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
             run === null || run === void 0 ? void 0 : run.click();
         });
     }
-    chrome.storage.sync.set({ 'language': '' });
+    yield chrome.storage.sync.set({ 'language': '' });
     if (!isKeyOf(location.origin, codesnippetSites)) {
         return;
     }
