@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Code snippet runner",
+  "version": "1.0",
+  "description": "Run code snippets",
+  "content_scripts": [
+    {
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "matches": ["https://*/*"]
+    }
+  ],
+  "permissions": [
+    "storage"
+  ],
+  "options_page": "options.html"
+}
