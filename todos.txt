@@ -1,5 +1,6 @@
 1. Make so you can't overwrite, maybe add instead.
 2. Make UI better.
-3. Add so you can add language for site and add site for language.
+3. Add so you can add language for site and add site for language. //Seems to work now
 4. Make code better, maybe work totally different.
 5. Make so use can write own css for run-button.
+6. Maybe make reset to default button

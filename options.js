@@ -9,11 +9,17 @@ const generateCodeSnippetSiteDiv = (site, siteObject, changeable = false) => {
     siteHeader.contentEditable = changeable.toString();
     codeSnippetSite.appendChild(siteHeader);
     Object.entries(siteObject.languageSelectors).forEach(([language, selector]) => {
-        const cssLanguageSelectors = generateLanguageSelectorDiv(site, language, selector, true);
+        const cssLanguageSelectors = generateLanguageSelectorDiv(site, language, selector, changeable);
         codeSnippetSite.appendChild(cssLanguageSelectors);
     });
     const addLanguageSelector = document.createElement('button');
     addLanguageSelector.textContent = 'Add language selector';
+    addLanguageSelector.type = 'button';
+    addLanguageSelector.addEventListener('click', (e) => {
+        const languageSelector = generateLanguageSelectorDiv(site, 'Write language here', '', true);
+        //insert before it self
+        codeSnippetSite.insertBefore(languageSelector, addLanguageSelector);
+    });
     codeSnippetSite.appendChild(addLanguageSelector);
     return codeSnippetSite;
 };
@@ -94,6 +100,7 @@ const generateLanguageSite = (site, siteObject, languageToSitesDiv, selected, la
     removeSite.classList.add('remove');
     removeSite.textContent = 'Remove';
     codeSnippetSite.appendChild(removeSite);
+    return codeSnippetSite;
 };
 const generateLanguageToSiteDiv = (language, languageObject, selected, changeable = false) => {
     const languageToSitesDiv = document.createElement('div');
@@ -104,6 +111,19 @@ const generateLanguageToSiteDiv = (language, languageObject, selected, changeabl
     languageHeader.contentEditable = changeable.toString();
     languageToSitesDiv.appendChild(languageHeader);
     Object.entries(languageObject).forEach(([site, siteObject]) => generateLanguageSite(site, siteObject, languageToSitesDiv, selected, language, changeable));
+    const addSite = document.createElement('button');
+    addSite.classList.add('add-language-site');
+    addSite.textContent = 'Add site';
+    addSite.type = 'button';
+    addSite.addEventListener('click', (e) => {
+        const languageSite = generateLanguageSite('Write site here', { runSelector: '', editorSelector: '' }, languageToSitesDiv, selected, language, true);
+        //insert before it self
+        if (!languageSite) {
+            return;
+        }
+        languageToSitesDiv.insertBefore(languageSite, addSite);
+    });
+    languageToSitesDiv.appendChild(addSite);
     return languageToSitesDiv;
 };
 const generateLanguageToSitesDiv = (languageToSites, selected) => {
