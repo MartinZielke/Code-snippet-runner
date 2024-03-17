@@ -7,16 +7,20 @@ type codesnippetSitesObj = {
 }
 
 type LanguageToSitesObj = {
-    [key: string]: {
-        [key: string]: {
-            runSelector?: string;
-            editorSelector?: string;
-        }
-    }
+    [key: string]: LanguageObject
 }
 
 type SelectedObj = {
     [key: string]: string
+}
+
+type LanguageObject = {
+    [key: string]: SiteObject
+}
+
+type SiteObject = {
+    runSelector?: string | undefined;
+    editorSelector?: string | undefined;
 }
 
 const isKeyOf = <T extends Object>(key: keyof any, obj: T): key is keyof T => key in obj;
@@ -96,78 +100,92 @@ const generateCodeSnippetSitesDiv = (codesnippetSites: codesnippetSitesObj) => {
     codesnippetSitesHtml?.appendChild(addSite);
 };
 
+
+const generateLanguageSite = (site: string, siteObject: SiteObject, languageToSitesDiv: HTMLDivElement, selected: SelectedObj, language: string, changeable = false) => {
+    const codeSnippetSite = document.createElement('div')
+    codeSnippetSite.classList.add('language-site')
+
+    const languageSiteUrl = document.createElement('div')
+    languageSiteUrl.classList.add('language-site-url')
+    languageSiteUrl.textContent = site
+    languageSiteUrl.contentEditable = changeable.toString();
+
+
+    codeSnippetSite.appendChild(languageSiteUrl)
+
+    languageToSitesDiv?.appendChild(codeSnippetSite)
+
+    const runSelectorInput = document.createElement('input')
+    runSelectorInput.classList.add('run-selector')
+    runSelectorInput.value = siteObject.runSelector ?? ''
+    runSelectorInput.name = `${language}|${site}`
+
+    codeSnippetSite.appendChild(runSelectorInput)
+
+    const editorSelectorInput = document.createElement('input')
+    editorSelectorInput.classList.add('editor-selector')
+    editorSelectorInput.value = siteObject.editorSelector ?? ''
+    editorSelectorInput.name = `${language}|${site}`
+    editorSelectorInput.placeholder = 'Leave empty to use a selector that should work on most sites.'
+    codeSnippetSite.appendChild(editorSelectorInput)
+
+    const selectedRadioButton = document.createElement('input')
+    selectedRadioButton.classList.add('selected-site-for-language')
+    selectedRadioButton.type = 'radio'
+    selectedRadioButton.name = language
+    selectedRadioButton.value = site
+
+    if (!isKeyOf(language, selected) && !changeable) {
+        return
+    }
+
+    if (changeable) {
+        selectedRadioButton.checked = true
+    }
+
+    selectedRadioButton.checked = selected[language] === site;
+
+    codeSnippetSite.appendChild(selectedRadioButton)
+
+    const removeSite = document.createElement('button')
+    removeSite.classList.add('remove')
+    removeSite.textContent = 'Remove'
+    codeSnippetSite.appendChild(removeSite)
+
+
+}
+
+
+const generateLanguageToSiteDiv = (language: string, languageObject: LanguageObject, selected: SelectedObj, changeable = false): HTMLDivElement => {
+    const languageToSitesDiv = document.createElement('div')
+    languageToSitesDiv.classList.add('language-to-sites')
+
+    const languageHeader = document.createElement('b')
+    languageHeader.textContent = language
+    languageHeader.classList.add('language-header')
+    languageHeader.contentEditable = changeable.toString();
+
+    languageToSitesDiv.appendChild(languageHeader)
+
+    Object.entries(languageObject).forEach(([site, siteObject]) => generateLanguageSite(site, siteObject, languageToSitesDiv, selected, language, changeable))
+
+    return languageToSitesDiv;
+
+}
+
 const generateLanguageToSitesDiv = (languageToSites: LanguageToSitesObj, selected: SelectedObj) => {
     const languageToSitesHtml = document.querySelector<HTMLDivElement>("#language-sites");
+
     Object.entries(languageToSites).forEach(([language, languageObject]) => {
-        const languageToSitesDiv = document.createElement('div');
-        languageToSitesDiv.classList.add('language-to-sites');
-
-        const languageHeader = document.createElement('b');
-        languageHeader.textContent = language;
-        languageHeader.classList.add('language-header');
-
-        languageToSitesDiv.appendChild(languageHeader);
-        languageToSitesHtml?.appendChild(languageToSitesDiv);
-
-        Object.entries(languageObject).forEach(([site, siteObject]) => {
-            const codeSnippetSite = document.createElement('div');
-            codeSnippetSite.classList.add('language-site');
-
-            const languageSiteUrl = document.createElement('div');
-            languageSiteUrl.classList.add('language-site-url');
-            languageSiteUrl.textContent = site;
-
-            codeSnippetSite.appendChild(languageSiteUrl);
-
-            languageToSitesDiv?.appendChild(codeSnippetSite);
-
-            const runSelectorInput = document.createElement('input');
-            runSelectorInput.classList.add('run-selector');
-            runSelectorInput.value = siteObject.runSelector ?? '';
-            runSelectorInput.name = `${language}|${site}`;
-
-            codeSnippetSite.appendChild(runSelectorInput);
-
-            const editorSelectorInput = document.createElement('input');
-            editorSelectorInput.classList.add('editor-selector');
-            editorSelectorInput.value = siteObject.editorSelector ?? '';
-            editorSelectorInput.name = `${language}|${site}`;
-            editorSelectorInput.placeholder = 'Leave empty to use a selector that should work on most sites.';
-            codeSnippetSite.appendChild(editorSelectorInput);
-
-            const selectedRadioButton = document.createElement('input');
-            selectedRadioButton.classList.add('selected-site-for-language');
-            selectedRadioButton.type = 'radio';
-            selectedRadioButton.name = language;
-            selectedRadioButton.value = site;
-
-            if (!isKeyOf(language, selected)) {
-                return;
-            }
-
-            if (selected[language] === site) {
-                selectedRadioButton.checked = true;
-            }
-
-            codeSnippetSite.appendChild(selectedRadioButton);
-
-            const removeSite = document.createElement('button');
-            removeSite.classList.add('remove');
-            removeSite.textContent = 'Remove';
-            codeSnippetSite.appendChild(removeSite);
-
-
-        });
-
-
-        const hr = document.createElement('hr');
-        languageToSitesDiv?.appendChild(hr);
-
-
-
+        const languageToSitesDiv = generateLanguageToSiteDiv(language, languageObject, selected);
+        languageToSitesHtml?.appendChild(languageToSitesDiv)
+        const hr = document.createElement('hr')
+        languageToSitesHtml?.appendChild(hr)
     })
 
     const addLanguage = document.createElement('button');
+    addLanguage.classList.add('add-language');
+    addLanguage.type = 'button';
     addLanguage.textContent = 'Add language';
     languageToSitesHtml?.appendChild(addLanguage);
 }
@@ -254,6 +272,20 @@ chrome.storage.sync.get(['codesnippetSites', 'languageToSites', 'selected'], (re
             codesnippetSitesHtml?.appendChild(hr);
             codesnippetSitesHtml?.appendChild(e.target);
 
+        }
+
+        if (e.target.classList.contains('add-language')) {
+            const languageToSitesDiv = generateLanguageToSiteDiv("Write language here", {
+                "Write site here": {
+                    runSelector: "",
+                    editorSelector: ""
+                }
+            }, selected, true);
+            const languageToSitesHtml = document.querySelector<HTMLDivElement>("#language-sites");
+            languageToSitesHtml?.appendChild(languageToSitesDiv);
+            const hr = document.createElement('hr');
+            languageToSitesHtml?.appendChild(hr);
+            languageToSitesHtml?.appendChild(e.target);
         }
 
         if (e.target.classList.contains('remove')) {
