@@ -91,10 +91,7 @@ const generateLanguageSite = (site, siteObject, languageToSitesDiv, selected, la
     if (!isKeyOf(language, selected) && !changeable) {
         return;
     }
-    if (changeable) {
-        selectedRadioButton.checked = true;
-    }
-    selectedRadioButton.checked = selected[language] === site;
+    selectedRadioButton.checked = selected[language] === site || changeable;
     codeSnippetSite.appendChild(selectedRadioButton);
     const removeSite = document.createElement('button');
     removeSite.classList.add('remove');

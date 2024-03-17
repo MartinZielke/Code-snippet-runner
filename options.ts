@@ -145,11 +145,7 @@ const generateLanguageSite = (site: string, siteObject: SiteObject, languageToSi
         return
     }
 
-    if (changeable) {
-        selectedRadioButton.checked = true
-    }
-
-    selectedRadioButton.checked = selected[language] === site;
+    selectedRadioButton.checked = selected[language] === site || changeable;
 
     codeSnippetSite.appendChild(selectedRadioButton)
 
