@@ -172,8 +172,28 @@
 
     languageSelectors.forEach(([language, selector]) => {
 
-        const inputs = document.querySelectorAll(selector);
+        let inputs = document.querySelectorAll(selector);
+        createButtonForEach(inputs, language, selected);
+
+        const callback = () => {
+            inputs = document.querySelectorAll(selector);
+            createButtonForEach(inputs, language, selected);
+
+        };
+
+        const observer = new MutationObserver(callback);
+
+        observer.observe(document.body, { childList: true, subtree: true });
+
+    })
+
+    function createButtonForEach(inputs: NodeListOf<Element>, language: string, selected: SelectedObj) {
         inputs.forEach(input => {
+
+            if (input.nextElementSibling?.classList.contains('code-snippet-runner-ext-button')) {
+                return;
+            }
+
             const button = document.createElement('button');
             button.classList.add('code-snippet-runner-ext-button');
             button.textContent = 'Run';
@@ -194,10 +214,11 @@
 
                 window.open(selected[language]);
 
-            })
+            });
             input.after(button);
         });
-
-    })
+    }
 
 })();
+
+

@@ -145,12 +145,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     }
     const languageSelectors = Object.entries(codesnippetSites[location.origin].languageSelectors);
     languageSelectors.forEach(([language, selector]) => {
-        const inputs = document.querySelectorAll(selector);
+        let inputs = document.querySelectorAll(selector);
+        createButtonForEach(inputs, language, selected);
+        const callback = () => {
+            inputs = document.querySelectorAll(selector);
+            createButtonForEach(inputs, language, selected);
+        };
+        const observer = new MutationObserver(callback);
+        observer.observe(document.body, { childList: true, subtree: true });
+    });
+    function createButtonForEach(inputs, language, selected) {
         inputs.forEach(input => {
+            var _a;
+            if ((_a = input.nextElementSibling) === null || _a === void 0 ? void 0 : _a.classList.contains('code-snippet-runner-ext-button')) {
+                return;
+            }
             const button = document.createElement('button');
             button.classList.add('code-snippet-runner-ext-button');
             button.textContent = 'Run';
-            button.addEventListener('click', () => __awaiter(void 0, void 0, void 0, function* () {
+            button.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
                 const selection = window.getSelection();
                 if (!selection) {
                     return;
@@ -167,5 +180,5 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
             }));
             input.after(button);
         });
-    });
+    }
 }))();
