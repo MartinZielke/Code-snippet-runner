@@ -196,7 +196,6 @@
 
             const button = document.createElement('button');
             button.classList.add('code-snippet-runner-ext-button');
-            button.textContent = 'Run';
             button.addEventListener('click', async () => {
                 const selection = window.getSelection();
                 if (!selection) {

@@ -162,7 +162,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
             }
             const button = document.createElement('button');
             button.classList.add('code-snippet-runner-ext-button');
-            button.textContent = 'Run';
             button.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
                 const selection = window.getSelection();
                 if (!selection) {
