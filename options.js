@@ -138,9 +138,149 @@ const generateLanguageToSitesDiv = (languageToSites, selected) => {
     languageToSitesHtml === null || languageToSitesHtml === void 0 ? void 0 : languageToSitesHtml.appendChild(addLanguage);
 };
 chrome.storage.sync.get(['codesnippetSites', 'languageToSites', 'selected'], (result) => {
-    const codesnippetSites = result.codesnippetSites;
-    const languageToSites = result.languageToSites;
-    const selected = result.selected;
+    var _a, _b, _c;
+    const defaultCodesnippetSites = {
+        "https://chat.openai.com": {
+            "languageSelectors": {
+                "csharp": "code.language-csharp",
+                "javascript": "code.language-javascript",
+                "php": "code.language-php"
+            }
+        },
+        "https://claude.ai": {
+            "languageSelectors": {
+                "javascript": "code.language-javascript"
+            }
+        },
+        "https://developer.mozilla.org": {
+            "languageSelectors": {
+                "css": ".css code",
+                "html": ".html code",
+                "javascript": ".js code"
+            }
+        },
+        "https://kotlinlang.org": {
+            "languageSelectors": {
+                "kotlin": ".language-kotlin > code"
+            }
+        },
+        "https://learn.microsoft.com": {
+            "languageSelectors": {
+                "csharp": "code.lang-csharp"
+            }
+        },
+        "https://stackoverflow.com": {
+            "languageSelectors": {
+                "javascript": "code.language-javascript",
+                "php": "code.language-php"
+            }
+        },
+        "https://www.php.net": {
+            "languageSelectors": {
+                "php": ".phpcode code"
+            }
+        },
+        "https://www.w3schools.com": {
+            "languageSelectors": {
+                "javascript": ".jscolor",
+                "kotlin": "code.language-kotlin",
+                "php": ".language-php > code"
+            }
+        }
+    };
+    const defaultLanguageToSites = {
+        "csharp": {
+            "https://dotnetfiddle.net": {
+                "editorSelector": "",
+                "runSelector": "#run-button"
+            },
+            "https://www.onlinegdb.com/online_csharp_compiler": {
+                "editorSelector": "",
+                "runSelector": "#control-btn-run"
+            }
+        },
+        "css": {
+            "https://codepen.io/pen/": {
+                "editorSelector": "#box-css [autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": ""
+            },
+            "https://developer.mozilla.org/en-US/play": {
+                "editorSelector": "[data-language='css'][autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": "#run > span"
+            },
+            "https://jsfiddle.net": {
+                "editorSelector": ":has( >#id_code_css) [autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": "#run"
+            }
+        },
+        "html": {
+            "https://codepen.io/pen/": {
+                "editorSelector": "#box-html [autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": ""
+            },
+            "https://developer.mozilla.org/en-US/play": {
+                "editorSelector": "[data-language='html'][autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": "#run > span"
+            },
+            "https://jsfiddle.net": {
+                "editorSelector": ":has( >#id_code_html) [autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": "#run"
+            }
+        },
+        "javascript": {
+            "https://codepen.io/pen/": {
+                "editorSelector": "#box-js [autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": ""
+            },
+            "https://developer.mozilla.org/en-US/play": {
+                "editorSelector": "[data-language='javascript'][autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": "#run > span"
+            },
+            "https://jsfiddle.net": {
+                "editorSelector": ":has( >#id_code_js) [autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": "#run"
+            }
+        },
+        "kotlin": {
+            "https://play.kotlinlang.org/": {
+                "editorSelector": "",
+                "runSelector": "[data-test='run-button']"
+            },
+            "https://www.w3schools.com/kotlin/trykotlin.php?filename=demo_helloworld": {
+                "editorSelector": "",
+                "runSelector": "#runbtn"
+            }
+        },
+        "php": {
+            "https://3v4l.org": {
+                "editorSelector": "",
+                "runSelector": "#newForm > input[type=submit]"
+            },
+            "https://onecompiler.com/php": {
+                "editorSelector": "",
+                "runSelector": ".jss48 .MuiButton-containedSecondary > .MuiButton-label"
+            },
+            "https://onlinephp.io": {
+                "editorSelector": "",
+                "runSelector": "#sandboxform [type=\"submit\"]"
+            },
+            "https://www.w3schools.com/php/phptryit.asp?filename=tryphp_compiler": {
+                "editorSelector": "",
+                "runSelector": "#runbtn"
+            }
+        }
+    };
+    const defaultSelected = {
+        "csharp": "https://dotnetfiddle.net",
+        "css": "https://codepen.io/pen/",
+        "html": "https://codepen.io/pen/",
+        "javascript": "https://codepen.io/pen/",
+        "kotlin": "https://play.kotlinlang.org/",
+        "php": "https://onlinephp.io"
+    };
+    const codesnippetSites = (_a = result.codesnippetSites) !== null && _a !== void 0 ? _a : defaultCodesnippetSites;
+    const languageToSites = (_b = result.languageToSites) !== null && _b !== void 0 ? _b : defaultLanguageToSites;
+    const selected = (_c = result.selected) !== null && _c !== void 0 ? _c : defaultSelected;
     generateCodeSnippetSitesDiv(codesnippetSites);
     generateLanguageToSitesDiv(languageToSites, selected);
     const save = () => {
@@ -231,5 +371,10 @@ chrome.storage.sync.get(['codesnippetSites', 'languageToSites', 'selected'], (re
     options === null || options === void 0 ? void 0 : options.addEventListener('submit', (e) => {
         e.preventDefault();
         save();
+    });
+    const reset = document.querySelector('#reset');
+    reset === null || reset === void 0 ? void 0 : reset.addEventListener('click', () => {
+        chrome.storage.sync.remove(['codesnippetSites', 'languageToSites', 'selected']);
+        alert('Reset');
     });
 });

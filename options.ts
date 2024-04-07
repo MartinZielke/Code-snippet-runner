@@ -211,9 +211,150 @@ const generateLanguageToSitesDiv = (languageToSites: LanguageToSitesObj, selecte
 }
 
 chrome.storage.sync.get(['codesnippetSites', 'languageToSites', 'selected'], (result) => {
-    const codesnippetSites: codesnippetSitesObj = result.codesnippetSites;
-    const languageToSites: LanguageToSitesObj = result.languageToSites;
-    const selected: SelectedObj = result.selected;
+
+    const defaultCodesnippetSites: codesnippetSitesObj = {
+        "https://chat.openai.com": {
+            "languageSelectors": {
+                "csharp": "code.language-csharp",
+                "javascript": "code.language-javascript",
+                "php": "code.language-php"
+            }
+        },
+        "https://claude.ai": {
+            "languageSelectors": {
+                "javascript": "code.language-javascript"
+            }
+        },
+        "https://developer.mozilla.org": {
+            "languageSelectors": {
+                "css": ".css code",
+                "html": ".html code",
+                "javascript": ".js code"
+            }
+        },
+        "https://kotlinlang.org": {
+            "languageSelectors": {
+                "kotlin": ".language-kotlin > code"
+            }
+        },
+        "https://learn.microsoft.com": {
+            "languageSelectors": {
+                "csharp": "code.lang-csharp"
+            }
+        },
+        "https://stackoverflow.com": {
+            "languageSelectors": {
+                "javascript": "code.language-javascript",
+                "php": "code.language-php"
+            }
+        },
+        "https://www.php.net": {
+            "languageSelectors": {
+                "php": ".phpcode code"
+            }
+        },
+        "https://www.w3schools.com": {
+            "languageSelectors": {
+                "javascript": ".jscolor",
+                "kotlin": "code.language-kotlin",
+                "php": ".language-php > code"
+            }
+        }
+    };
+    const defaultLanguageToSites: LanguageToSitesObj = {
+        "csharp": {
+            "https://dotnetfiddle.net": {
+                "editorSelector": "",
+                "runSelector": "#run-button"
+            },
+            "https://www.onlinegdb.com/online_csharp_compiler": {
+                "editorSelector": "",
+                "runSelector": "#control-btn-run"
+            }
+        },
+        "css": {
+            "https://codepen.io/pen/": {
+                "editorSelector": "#box-css [autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": ""
+            },
+            "https://developer.mozilla.org/en-US/play": {
+                "editorSelector": "[data-language='css'][autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": "#run > span"
+            },
+            "https://jsfiddle.net": {
+                "editorSelector": ":has( >#id_code_css) [autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": "#run"
+            }
+        },
+        "html": {
+            "https://codepen.io/pen/": {
+                "editorSelector": "#box-html [autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": ""
+            },
+            "https://developer.mozilla.org/en-US/play": {
+                "editorSelector": "[data-language='html'][autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": "#run > span"
+            },
+            "https://jsfiddle.net": {
+                "editorSelector": ":has( >#id_code_html) [autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": "#run"
+            }
+        },
+        "javascript": {
+            "https://codepen.io/pen/": {
+                "editorSelector": "#box-js [autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": ""
+            },
+            "https://developer.mozilla.org/en-US/play": {
+                "editorSelector": "[data-language='javascript'][autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": "#run > span"
+            },
+            "https://jsfiddle.net": {
+                "editorSelector": ":has( >#id_code_js) [autocorrect='off'][autocapitalize='off'][spellcheck='false']",
+                "runSelector": "#run"
+            }
+        },
+        "kotlin": {
+            "https://play.kotlinlang.org/": {
+                "editorSelector": "",
+                "runSelector": "[data-test='run-button']"
+            },
+            "https://www.w3schools.com/kotlin/trykotlin.php?filename=demo_helloworld": {
+                "editorSelector": "",
+                "runSelector": "#runbtn"
+            }
+        },
+        "php": {
+            "https://3v4l.org": {
+                "editorSelector": "",
+                "runSelector": "#newForm > input[type=submit]"
+            },
+            "https://onecompiler.com/php": {
+                "editorSelector": "",
+                "runSelector": ".jss48 .MuiButton-containedSecondary > .MuiButton-label"
+            },
+            "https://onlinephp.io": {
+                "editorSelector": "",
+                "runSelector": "#sandboxform [type=\"submit\"]"
+            },
+            "https://www.w3schools.com/php/phptryit.asp?filename=tryphp_compiler": {
+                "editorSelector": "",
+                "runSelector": "#runbtn"
+            }
+        }
+    };
+    const defaultSelected: SelectedObj = {
+        "csharp": "https://dotnetfiddle.net",
+        "css": "https://codepen.io/pen/",
+        "html": "https://codepen.io/pen/",
+        "javascript": "https://codepen.io/pen/",
+        "kotlin": "https://play.kotlinlang.org/",
+        "php": "https://onlinephp.io"
+    };
+
+    const codesnippetSites: codesnippetSitesObj = result.codesnippetSites ?? defaultCodesnippetSites;
+    const languageToSites: LanguageToSitesObj = result.languageToSites ?? defaultLanguageToSites;
+    const selected: SelectedObj = result.selected ?? defaultSelected;
 
     generateCodeSnippetSitesDiv(codesnippetSites);
     generateLanguageToSitesDiv(languageToSites, selected);
@@ -327,6 +468,12 @@ chrome.storage.sync.get(['codesnippetSites', 'languageToSites', 'selected'], (re
     options?.addEventListener('submit', (e) => {
         e.preventDefault();
         save();
+    })
+
+    const reset = document.querySelector<HTMLButtonElement>('#reset');
+    reset?.addEventListener('click', () => {
+        chrome.storage.sync.remove(['codesnippetSites', 'languageToSites', 'selected']);
+        alert('Reset');
     })
 
 
